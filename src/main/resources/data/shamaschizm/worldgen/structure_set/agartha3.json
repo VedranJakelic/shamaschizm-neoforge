@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "shamaschizm:agartha3",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 710024116,
+    "spacing": 24,
+    "separation": 18,
+
+    "type": "minecraft:random_spread"
+  }
+}
