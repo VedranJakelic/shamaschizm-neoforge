@@ -17,7 +17,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
-/** Client-local breadcrumbs from actual tracked elf movement. No route packets required. */
+/** Private route motes plus a fallback trail from tracked elf movement. */
 @EventBusSubscriber(modid=Shamaschizm.MOD_ID,value=Dist.CLIENT)
 public final class ElfTrailClient {
     private record Crumb(Vec3 feet,long expires){}
@@ -32,7 +32,7 @@ public final class ElfTrailClient {
     }
     @SubscribeEvent public static void providers(RegisterParticleProvidersEvent event){
         event.registerSpriteSet(ElfTrailParticles.TRAIL,sprites->(options,level,x,y,z,dx,dy,dz,random)->
-                new Mote(level,x,y,z,sprites));
+                trackedMote(level,x,y,z,sprites));
     }
     @SubscribeEvent public static void tick(ClientTickEvent.Post event){
         var mc=Minecraft.getInstance();
@@ -57,13 +57,13 @@ public final class ElfTrailClient {
             while(TRAIL.size()>1024)TRAIL.remove(TRAIL.keySet().iterator().next());
         }
         ACTIVE.removeIf(p->{if(ticks-p.born>p.getLifetime()){p.remove();return true;}return !p.isAlive();});
-        if(!visible()||ticks%10!=0||ACTIVE.size()>=16)return;
+        if(!visible()||ticks%5!=0||ACTIVE.size()>=256)return;
         var random=mc.level.getRandom();
         List<Crumb> nearby=new ArrayList<>();
         for(Crumb c:TRAIL.values())if(c.feet.distanceToSqr(mc.player.position())<=24*24)nearby.add(c);
         if(nearby.isEmpty())return;
-        // At most two tiny motes per half second, even when several elves share a route.
-        for(int i=0;i<2&&ACTIVE.size()<16;i++){
+        // Bounded local fallback; saved-route motes do not depend on seeing an elf.
+        for(int i=0;i<3&&ACTIVE.size()<256;i++){
             Crumb c=nearby.get(random.nextInt(nearby.size()));
             double x=c.feet.x+(random.nextDouble()-0.5)*0.15;
             double y=c.feet.y+0.15+random.nextDouble()*0.12;
@@ -72,15 +72,21 @@ public final class ElfTrailClient {
             if(!mc.level.hasChunkAt(pos)||!mc.level.getBlockState(pos).getCollisionShape(mc.level,pos).isEmpty()
                     ||!mc.level.getFluidState(pos).isEmpty())continue;
             var p=mc.particleEngine.createParticle(ElfTrailParticles.TRAIL,x,y,z,0,0,0);
-            if(p instanceof Mote mote)ACTIVE.add(mote);
+            // The provider tracks both local and server-sent particles.
         }
+    }
+    private static Mote trackedMote(ClientLevel level,double x,double y,double z,SpriteSet sprites) {
+        if (!visible()) return null;
+        ACTIVE.removeIf(p -> !p.isAlive());
+        if (ACTIVE.size()>=256) return null;
+        Mote mote=new Mote(level,x,y,z,sprites);ACTIVE.add(mote);return mote;
     }
     private static final class Mote extends SimpleAnimatedParticle {
         private final long born=ticks;
         Mote(ClientLevel level,double x,double y,double z,SpriteSet sprites){
             super(level,x,y,z,sprites,0);
-            setColor(0xFFFFFF);quadSize=0.028F;lifetime=28+random.nextInt(15);
-            yd=0.002F;xd=0;zd=0;alpha=0;hasPhysics=true;setSpriteFromAge(sprites);
+            setColor(0xFFFFFF);quadSize=0.028F;lifetime=180+random.nextInt(81);
+            yd=0.0006F;xd=0;zd=0;alpha=0;hasPhysics=true;setSpriteFromAge(sprites);
         }
         @Override public void tick(){
             if(!visible()||Minecraft.getInstance().level!=level){remove();return;}

@@ -132,7 +132,7 @@ public final class MegalithicGateEntity extends PathfinderMob {
             return;
         }
 
-        if(level() instanceof ServerLevel server && net.beamex.shamaschizm.experimental.BossGardenLocks.isLockedGate(server,blockPosition())){
+        if(!phraseUnlocked && level() instanceof ServerLevel server && net.beamex.shamaschizm.experimental.BossGardenLocks.isLockedGate(server,blockPosition())){
             boolean wasOpen=isOpen();entityData.set(OPEN,false);entityData.set(OPEN_TICKS,0);fireTraceTicks=0;unlockBraziers=List.of();
             if(wasOpen || tickCount<=1 || tickCount%20==0)installCollisionBlocks();
             return;
@@ -215,7 +215,14 @@ public final class MegalithicGateEntity extends PathfinderMob {
         }
     }
 
+    public void openByPhrase() {
+        if (!(level() instanceof ServerLevel)) return;
+        phraseUnlocked=true;openGate();
+    }
+
+    private boolean phraseUnlocked;
     private void openGate() {
+        if (!(level() instanceof ServerLevel) || entityData.get(OPEN)) return;
         entityData.set(OPEN, true);
         entityData.set(OPEN_TICKS, 0);
         fireTraceTicks = 0;
@@ -335,6 +342,7 @@ public final class MegalithicGateEntity extends PathfinderMob {
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
+        output.putBoolean("PhraseUnlocked",phraseUnlocked);
         output.putBoolean("MegalithicGateOpen", isOpen());
         output.putInt("MegalithicGateOpenTicks", getOpenTicks());
         output.putInt("MegalithicGateFacing", getGateFacing().get2DDataValue());
@@ -343,6 +351,7 @@ public final class MegalithicGateEntity extends PathfinderMob {
     @Override
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
+        phraseUnlocked=input.getBooleanOr("PhraseUnlocked",false);
         entityData.set(OPEN, input.getBooleanOr("MegalithicGateOpen", false));
         entityData.set(OPEN_TICKS, input.getIntOr("MegalithicGateOpenTicks", 0));
         setGateFacing(Direction.from2DDataValue(input.getIntOr(

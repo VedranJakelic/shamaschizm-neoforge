@@ -75,7 +75,7 @@ public final class ElfConversations {
         ServerPlayer p=event.getPlayer();Session s=SESSIONS.get(p.getUUID());if(s==null)return;
         String answer=event.getRawText().trim().toLowerCase(Locale.ROOT);
         if(!Set.of("y","yes","n","no").contains(answer))return;
-        event.setCanceled(true); // Never broadcast a conversation answer to ordinary chat.
+        // Keep the original signed player message in ordinary chat; only prompts are private.
         // Chat may be delivered through an asynchronous pipeline. Mutate the world on the server thread.
         p.level().getServer().execute(() -> {
             if(SESSIONS.get(p.getUUID())!=s)return;

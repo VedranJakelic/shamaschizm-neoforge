@@ -61,9 +61,12 @@ public class SchizmPortalBlock extends Block {
             PortalAtmosphereData.get(server).add(pos);
         }
         if (level instanceof ServerLevel server && !oldState.is(this)) {
-            reorientConnected(server, pos);
+            server.scheduleTick(pos, this, 2);
         }
     }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) { reorientConnected(level,pos); }
 
     @Override
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level,
@@ -97,7 +100,7 @@ public class SchizmPortalBlock extends Block {
         int minX = start.getX(), maxX = start.getX();
         int minZ = start.getZ(), maxZ = start.getZ();
 
-        while (!queue.isEmpty()) {
+        while (!queue.isEmpty() && component.size() <= 4096) {
             BlockPos current = queue.removeFirst();
             minX = Math.min(minX, current.getX());
             maxX = Math.max(maxX, current.getX());
@@ -105,7 +108,7 @@ public class SchizmPortalBlock extends Block {
             maxZ = Math.max(maxZ, current.getZ());
             for (Direction direction : Direction.values()) {
                 BlockPos next = current.relative(direction);
-                if (component.contains(next) || !level.getBlockState(next).is(ModBlocks.SCHIZM_PORTAL)) continue;
+                if (!level.hasChunkAt(next) || component.contains(next) || !level.getBlockState(next).is(ModBlocks.SCHIZM_PORTAL)) continue;
                 BlockPos immutable = next.immutable();
                 component.add(immutable);
                 queue.addLast(immutable);

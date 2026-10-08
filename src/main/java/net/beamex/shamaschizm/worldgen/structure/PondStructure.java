@@ -146,12 +146,34 @@ public final class PondStructure extends Structure {
         Heightmap.Types heightmapType = projectStartToHeightmap
                 .orElse(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
 
-        Optional<GenerationStub> stub = backingJigsaw.findGenerationPoint(context);
-        if (stub.isEmpty()) return Optional.empty();
-        BlockPos anchor = stub.get().position();
-        if (!isAreaFlatEnough(context, heightmapType, anchor)) return Optional.empty();
-        if (avoidWater && isAreaWatery(context, heightmapType, anchor)) return Optional.empty();
-        return stub;
+        boolean agartha=startPool.unwrapKey().map(k->k.identifier().getNamespace().equals("shamaschizm")
+                && java.util.Set.of("agartha1_pool","agartha2_pool","agartha3_pool").contains(k.identifier().getPath())).orElse(false);
+        int x=context.chunkPos().getMiddleBlockX(),z=context.chunkPos().getMiddleBlockZ();
+        int y=context.chunkGenerator().getFirstOccupiedHeight(x,z,heightmapType,context.heightAccessor(),context.randomState());
+        var biome=context.biomeSource().getNoiseBiome(x>>2,y>>2,z>>2,context.randomState().sampler());
+        boolean extra=agartha && biome.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BIOME,
+                net.beamex.shamaschizm.Shamaschizm.id("agartha_extra_attempts")));
+        for(int attempt=0;attempt<(extra?5:1);attempt++){
+            Optional<GenerationStub> stub;
+            if(attempt==0)stub=backingJigsaw.findGenerationPoint(context);
+            else {
+                // Independent nearby positions inside this same reserved start chunk.
+                int height=startHeight.sample(context.random(),new net.minecraft.world.level.levelgen.WorldGenerationContext(context.chunkGenerator(),context.heightAccessor()));
+                BlockPos start=new BlockPos(context.chunkPos().getMinBlockX()+context.random().nextInt(16),height,
+                        context.chunkPos().getMinBlockZ()+context.random().nextInt(16));
+                stub=net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement.addPieces(context,startPool,startJigsawName,
+                        maxDepth,start,useExpansionHack,projectStartToHeightmap,
+                        new JigsawStructure.MaxDistance(maxDistanceFromCenter,maxDistanceFromCenter),
+                        net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup.create(java.util.List.of(),start,context.seed()),
+                        JigsawStructure.DEFAULT_DIMENSION_PADDING,JigsawStructure.DEFAULT_LIQUID_SETTINGS);
+            }
+            if(stub.isEmpty())continue;
+            BlockPos anchor=stub.get().position();
+            if(!isAreaFlatEnough(context,heightmapType,anchor))continue;
+            if(avoidWater&&isAreaWatery(context,heightmapType,anchor))continue;
+            return stub;
+        }
+        return Optional.empty();
     }
 
     // ===================== Terrain checks =====================

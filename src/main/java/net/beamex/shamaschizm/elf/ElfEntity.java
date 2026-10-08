@@ -18,6 +18,7 @@ public final class ElfEntity extends PathfinderMob {
     private List<BlockPos> route=List.of();
     private List<BoundingBox> rooms=List.of();
     private int waypoint, direction=1, stalled;
+    private boolean trailImported;
     public ElfEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type,level);setPersistenceRequired();setInvulnerable(true);setSilent(true);
     }
@@ -34,6 +35,7 @@ public final class ElfEntity extends PathfinderMob {
     @Override public void tick() {
         super.tick();
         if (!(level() instanceof ServerLevel level)) return;
+        if (!trailImported) { ElfRouteData.get(level).add(route); trailImported=true; }
         if (ElfConversations.busy(this)) {getNavigation().stop();return;}
         if (route.isEmpty() || tickCount%20!=0) return;
         waypoint=Math.max(0,Math.min(route.size()-1,waypoint));

@@ -8,6 +8,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 public final class ElfRoutes {
     private ElfRoutes(){}
     public static void spawn(ServerLevel level,List<BlockPos> markers,List<BoundingBox> rooms) {
+        ElfRouteData.get(level).add(markers); // Independent of elf pathfinding and spawn success.
         List<BlockPos> points=new ArrayList<>();
         for(BlockPos marker:markers){
             BlockPos floor=findFloor(level,marker,rooms);

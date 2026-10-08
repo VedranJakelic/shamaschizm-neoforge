@@ -63,7 +63,10 @@ public final class PortalVisualClient {
         ensureLevel(level);
         boolean wasPortal = oldState.is(ModBlocks.SCHIZM_PORTAL);
         boolean isPortal = newState.is(ModBlocks.SCHIZM_PORTAL);
-        if (wasPortal == isPortal) return;
+        if (wasPortal == isPortal) {
+            if (isPortal && oldState.getValue(SchizmPortalBlock.AXIS) != newState.getValue(SchizmPortalBlock.AXIS)) dirty=true;
+            return;
+        }
         if (isPortal) PORTAL_BLOCKS.add(pos.immutable());
         else PORTAL_BLOCKS.remove(pos);
         dirty = true;
