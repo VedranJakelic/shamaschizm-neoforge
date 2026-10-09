@@ -13,7 +13,9 @@ public final class StagEntity extends Cow {
     private record Observation(boolean seen,long tick){}
     private final Map<UUID,Observation> observers=new HashMap<>();
     private int unseenTicks;
-    public StagEntity(EntityType<? extends Cow> type,Level level){super(type,level);}
+    public StagEntity(EntityType<? extends Cow> type,Level level){super(type,level);setSilent(true);}
+    // Enforce silence for existing saved stags too, regardless of their old Silent tag.
+    @Override public boolean isSilent(){return true;}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(UNSEEN,false);}
     @Override protected void registerGoals(){
         super.registerGoals();

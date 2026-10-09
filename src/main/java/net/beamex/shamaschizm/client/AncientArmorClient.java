@@ -8,6 +8,7 @@ import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import org.jspecify.annotations.Nullable;
@@ -60,14 +61,14 @@ public final class AncientArmorClient {
 
     /** Re-bakes on renderer/resource reload, so stale model parts are never retained. */
     public static void bakeModels(EntityModelSet models) {
-        helmet = new AncientArmorModel(models.bakeLayer(AncientArmorModel.HELMET_LAYER));
-        chestplate = new AncientArmorModel(models.bakeLayer(AncientArmorModel.CHESTPLATE_LAYER));
-        leggings = new AncientArmorModel(models.bakeLayer(AncientArmorModel.LEGGINGS_LAYER));
-        boots = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BOOTS_LAYER));
-        babyHelmet = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_HELMET_LAYER));
-        babyChestplate = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_CHESTPLATE_LAYER));
-        babyLeggings = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_LEGGINGS_LAYER));
-        babyBoots = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_BOOTS_LAYER));
+        helmet = new AncientArmorModel(models.bakeLayer(AncientArmorModel.HELMET_LAYER),EquipmentSlot.HEAD,false);
+        chestplate = new AncientArmorModel(models.bakeLayer(AncientArmorModel.CHESTPLATE_LAYER),EquipmentSlot.CHEST,false);
+        leggings = new AncientArmorModel(models.bakeLayer(AncientArmorModel.LEGGINGS_LAYER),EquipmentSlot.LEGS,false);
+        boots = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BOOTS_LAYER),EquipmentSlot.FEET,false);
+        babyHelmet = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_HELMET_LAYER),EquipmentSlot.HEAD,true);
+        babyChestplate = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_CHESTPLATE_LAYER),EquipmentSlot.CHEST,true);
+        babyLeggings = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_LEGGINGS_LAYER),EquipmentSlot.LEGS,true);
+        babyBoots = new AncientArmorModel(models.bakeLayer(AncientArmorModel.BABY_BOOTS_LAYER),EquipmentSlot.FEET,true);
     }
 
     private static boolean hasAncientAppearance(ItemStack stack) {

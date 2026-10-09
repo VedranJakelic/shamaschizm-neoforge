@@ -22,7 +22,8 @@
     "AntlerRenderStateMixin",
     "AntlerExtractMixin",
     "GuardianBeamInvoker",
-    "GallopJukeboxSoundMixin"
+    "GallopJukeboxSoundMixin",
+    "AncientArmorTrimMeshMixin"
   ],
   "injectors": {
     "defaultRequire": 1

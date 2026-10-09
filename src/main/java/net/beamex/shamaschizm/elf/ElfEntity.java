@@ -56,6 +56,10 @@ public final class ElfEntity extends PathfinderMob {
         else if (++stalled>=5) {direction=-direction;waypoint=Math.max(0,Math.min(route.size()-1,waypoint+direction));stalled=0;}
     }
     @Override public boolean hurtServer(ServerLevel level,DamageSource source,float amount){return false;}
+    // LivingEntity's own tick can push OTHER entities even when this elf is
+    // unpushable. Disable that outgoing push path as well as incoming pushes.
+    @Override protected void pushEntities(){}
+    @Override protected void doPush(Entity entity){}
     @Override public boolean isPushable(){return false;}
     @Override public boolean isPickable(){return false;}
     @Override public boolean isAttackable(){return false;}
