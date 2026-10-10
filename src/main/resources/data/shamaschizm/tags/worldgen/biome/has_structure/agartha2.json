@@ -3,11 +3,13 @@
   "values": [
 
     "minecraft:snowy_taiga",
-    "minecraft:snowy_plains",
     "minecraft:ice_spikes",
     "minecraft:snowy_slopes",
     "minecraft:frozen_peaks",
-    "minecraft:frozen_river"
+    "minecraft:ice_mountains",
+    "minecraft:ice_plains",
+    "minecraft:ice_plains_spikes",
+    "minecraft:jagged_peaks"
 
   ]
 }
